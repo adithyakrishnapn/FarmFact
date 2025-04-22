@@ -8,7 +8,7 @@ use App\Services\Mailer;
 $secret = $_ENV['JWT_SECRET'];
 
 
-$app->post('/signup', function ($request, $response) use ($container) {
+/**$app->post('/signup', function ($request, $response) use ($container) {
     $db = getDB();
     $data = $request->getParsedBody();
     $name = $data['name'];
@@ -64,7 +64,7 @@ $app->post('/signup', function ($request, $response) use ($container) {
 
     $response->getBody()->write(json_encode(['message' => 'Signup successful, OTP sent to email']));
     return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
-});
+}); **/
 
 
 $app->post('/login', function (Request $request, Response $response) use ($secret) {
@@ -90,6 +90,83 @@ $app->post('/login', function (Request $request, Response $response) use ($secre
     return $response->withHeader('Content-Type', 'application/json');
 });
 
+
+$app->post('/change-password', function (Request $request, Response $response) {
+    $db = getDB();
+    $data = $request->getParsedBody();
+    $email = $data['email'] ?? null;
+    $otp = $data['otp'] ?? null;
+    $newPassword = $data['newPassword'] ?? null;
+
+    // Step 1: If only email is sent — generate and send OTP
+    if ($email && !$otp && !$newPassword) {
+        // Check if email exists
+        $stmt = $db->prepare("SELECT * FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        $user = $stmt->fetch();
+
+        if (!$user) {
+            $response->getBody()->write(json_encode(['msg' => 'Email not found']));
+            return $response->withHeader('Content-Type', 'application/json');
+            
+        }
+
+        // Generate OTP
+        $otpCode = rand(100000, 999999);
+
+        // Delete any old OTPs for this purpose
+        $stmt = $db->prepare("DELETE FROM otp_verifications WHERE email = ? AND purpose = 'password_reset'");
+        $stmt->execute([$email]);
+
+        // Insert new OTP
+        $stmt = $db->prepare("INSERT INTO otp_verifications (email, otp, purpose) VALUES (?, ?, 'password_reset')");
+        $stmt->execute([$email, $otpCode]);
+
+        // Send OTP
+        $mailer = new Mailer();
+        $sent = $mailer->sendOTP($email, $otpCode);
+
+        if ($sent) {
+            $response->getBody()->write(json_encode(['msg' => 'OTP sent']));
+                return $response->withHeader('Content-Type', 'application/json');
+
+        } else {
+            $response->getBody()->write(json_encode(['msg' => 'Failed to send OTP']));
+                return $response->withHeader('Content-Type', 'application/json');
+        }
+    }
+
+    // Step 2: Validate OTP and change password
+    if ($email && $otp && $newPassword) {
+        $stmt = $db->prepare("SELECT * FROM otp_verifications 
+                              WHERE email = ? AND otp = ? AND purpose = 'password_reset' 
+                              AND created_at >= NOW() - INTERVAL 10 MINUTE");
+        $stmt->execute([$email, $otp]);
+        $otpData = $stmt->fetch();
+
+        if (!$otpData) {
+            $response->getBody()->write(json_encode(['msg' => 'Invalid, or expired otp']));
+            return $response->withHeader('Content-Type', 'application/json');
+        }
+
+        // Update password
+        $hashed = password_hash($newPassword, PASSWORD_BCRYPT);
+        $stmt = $db->prepare("UPDATE users SET password = ? WHERE email = ?");
+        $stmt->execute([$hashed, $email]);
+
+        // Delete OTP
+        $stmt = $db->prepare("DELETE FROM otp_verifications WHERE email = ? AND purpose = 'password_reset'");
+        $stmt->execute([$email]);
+
+        $response->getBody()->write(json_encode(['msg' => 'Password Changed Successfully']));
+        return $response->withHeader('Content-Type', 'application/json');
+        
+    }
+
+    $response->getBody()->write(json_encode(['msg' => 'Invalid request, please provide email, OTP, and new password']));
+    return $response->withHeader('Content-Type', 'application/json');
+    
+});
 
 
 
