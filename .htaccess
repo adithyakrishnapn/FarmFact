@@ -1,0 +1,15 @@
+RewriteEngine On
+
+# Handle static files first
+RewriteCond %{REQUEST_URI} ^/images/(.*)$
+RewriteCond %{DOCUMENT_ROOT}/public/images/%1 -f
+RewriteRule ^images/(.*)$ public/images/$1 [L]
+
+# Return 404 for missing static files (don't pass to Slim)
+RewriteCond %{REQUEST_URI} ^/(images|css|js|assets)/
+RewriteRule ^(.*)$ - [R=404,L]
+
+# Route everything else to Slim
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]
