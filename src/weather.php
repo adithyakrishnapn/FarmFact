@@ -124,7 +124,7 @@ $app->get('/weather', function (Request $request, Response $response) {
                 ->withHeader('Content-Type', 'application/json');
         }
         
-        // Extract hourly data for all requested days starting from 6 AM with 3-hour intervals
+        // Extract temperature data for all requested days starting from 6 AM with 3-hour intervals
         $forecastDays = $weatherData['forecast']['forecastday'];
         $dailyForecasts = [];
         $targetHours = [6, 9, 12, 15, 18, 21]; // 6 AM, 9 AM, 12 PM, 3 PM, 6 PM, 9 PM
@@ -132,57 +132,22 @@ $app->get('/weather', function (Request $request, Response $response) {
         foreach ($forecastDays as $dayData) {
             $dayDate = $dayData['date'];
             $hourlyData = $dayData['hour'];
-            $weatherHours = [];
+            $temperatureHours = [];
             
             foreach ($targetHours as $hour) {
                 if (isset($hourlyData[$hour])) {
                     $hourData = $hourlyData[$hour];
-                    $weatherHours[] = [
+                    $temperatureHours[] = [
                         'time' => date('H:i', strtotime($hourData['time'])),
-                        'time_full' => $hourData['time'],
                         'temperature_c' => $hourData['temp_c'],
-                        'temperature_f' => $hourData['temp_f'],
-                        'condition' => $hourData['condition']['text'],
-                        'condition_icon' => $hourData['condition']['icon'],
-                        'humidity' => $hourData['humidity'],
-                        'wind_kph' => $hourData['wind_kph'],
-                        'wind_mph' => $hourData['wind_mph'],
-                        'wind_dir' => $hourData['wind_dir'],
-                        'pressure_mb' => $hourData['pressure_mb'],
-                        'pressure_in' => $hourData['pressure_in'],
-                        'precip_mm' => $hourData['precip_mm'],
-                        'precip_in' => $hourData['precip_in'],
-                        'cloud' => $hourData['cloud'],
-                        'feelslike_c' => $hourData['feelslike_c'],
-                        'feelslike_f' => $hourData['feelslike_f'],
-                        'uv' => $hourData['uv']
+                        'temperature_f' => $hourData['temp_f']
                     ];
                 }
             }
             
-            // Add daily summary data
             $dailyForecasts[] = [
                 'date' => $dayDate,
-                'date_formatted' => date('Y-m-d (l)', strtotime($dayDate)),
-                'day_summary' => [
-                    'maxtemp_c' => $dayData['day']['maxtemp_c'],
-                    'maxtemp_f' => $dayData['day']['maxtemp_f'],
-                    'mintemp_c' => $dayData['day']['mintemp_c'],
-                    'mintemp_f' => $dayData['day']['mintemp_f'],
-                    'avgtemp_c' => $dayData['day']['avgtemp_c'],
-                    'avgtemp_f' => $dayData['day']['avgtemp_f'],
-                    'condition' => $dayData['day']['condition']['text'],
-                    'condition_icon' => $dayData['day']['condition']['icon'],
-                    'maxwind_kph' => $dayData['day']['maxwind_kph'],
-                    'maxwind_mph' => $dayData['day']['maxwind_mph'],
-                    'totalprecip_mm' => $dayData['day']['totalprecip_mm'],
-                    'totalprecip_in' => $dayData['day']['totalprecip_in'],
-                    'avghumidity' => $dayData['day']['avghumidity'],
-                    'daily_chance_of_rain' => $dayData['day']['daily_chance_of_rain'],
-                    'daily_chance_of_snow' => $dayData['day']['daily_chance_of_snow'],
-                    'uv' => $dayData['day']['uv']
-                ],
-                'hourly_forecast' => $weatherHours
+                'temperature_forecast' => $temperatureHours
             ];
         }
         
@@ -192,20 +157,7 @@ $app->get('/weather', function (Request $request, Response $response) {
             'location' => [
                 'name' => $weatherData['location']['name'],
                 'region' => $weatherData['location']['region'],
-                'country' => $weatherData['location']['country'],
-                'lat' => $weatherData['location']['lat'],
-                'lon' => $weatherData['location']['lon'],
-                'tz_id' => $weatherData['location']['tz_id'],
-                'localtime' => $weatherData['location']['localtime']
-            ],
-            'current' => [
-                'temp_c' => $weatherData['current']['temp_c'],
-                'temp_f' => $weatherData['current']['temp_f'],
-                'condition' => $weatherData['current']['condition']['text'],
-                'condition_icon' => $weatherData['current']['condition']['icon'],
-                'humidity' => $weatherData['current']['humidity'],
-                'wind_kph' => $weatherData['current']['wind_kph'],
-                'wind_dir' => $weatherData['current']['wind_dir']
+                'country' => $weatherData['location']['country']
             ],
             'forecast' => $dailyForecasts,
             'request_info' => [
@@ -214,8 +166,7 @@ $app->get('/weather', function (Request $request, Response $response) {
                 'state' => $state,
                 'days_requested' => $days,
                 'intervals' => '3 hours',
-                'start_time' => '06:00',
-                'timezone' => $weatherData['location']['tz_id']
+                'start_time' => '06:00'
             ]
         ];
         
@@ -359,7 +310,7 @@ $app->get('/weather/coordinates', function (Request $request, Response $response
                 ->withHeader('Content-Type', 'application/json');
         }
         
-        // Extract hourly data for all requested days starting from 6 AM with 3-hour intervals
+        // Extract temperature data for all requested days starting from 6 AM with 3-hour intervals
         $forecastDays = $weatherData['forecast']['forecastday'];
         $dailyForecasts = [];
         $targetHours = [6, 9, 12, 15, 18, 21];
@@ -367,57 +318,22 @@ $app->get('/weather/coordinates', function (Request $request, Response $response
         foreach ($forecastDays as $dayData) {
             $dayDate = $dayData['date'];
             $hourlyData = $dayData['hour'];
-            $weatherHours = [];
+            $temperatureHours = [];
             
             foreach ($targetHours as $hour) {
                 if (isset($hourlyData[$hour])) {
                     $hourData = $hourlyData[$hour];
-                    $weatherHours[] = [
+                    $temperatureHours[] = [
                         'time' => date('H:i', strtotime($hourData['time'])),
-                        'time_full' => $hourData['time'],
                         'temperature_c' => $hourData['temp_c'],
-                        'temperature_f' => $hourData['temp_f'],
-                        'condition' => $hourData['condition']['text'],
-                        'condition_icon' => $hourData['condition']['icon'],
-                        'humidity' => $hourData['humidity'],
-                        'wind_kph' => $hourData['wind_kph'],
-                        'wind_mph' => $hourData['wind_mph'],
-                        'wind_dir' => $hourData['wind_dir'],
-                        'pressure_mb' => $hourData['pressure_mb'],
-                        'pressure_in' => $hourData['pressure_in'],
-                        'precip_mm' => $hourData['precip_mm'],
-                        'precip_in' => $hourData['precip_in'],
-                        'cloud' => $hourData['cloud'],
-                        'feelslike_c' => $hourData['feelslike_c'],
-                        'feelslike_f' => $hourData['feelslike_f'],
-                        'uv' => $hourData['uv']
+                        'temperature_f' => $hourData['temp_f']
                     ];
                 }
             }
             
-            // Add daily summary data
             $dailyForecasts[] = [
                 'date' => $dayDate,
-                'date_formatted' => date('Y-m-d (l)', strtotime($dayDate)),
-                'day_summary' => [
-                    'maxtemp_c' => $dayData['day']['maxtemp_c'],
-                    'maxtemp_f' => $dayData['day']['maxtemp_f'],
-                    'mintemp_c' => $dayData['day']['mintemp_c'],
-                    'mintemp_f' => $dayData['day']['mintemp_f'],
-                    'avgtemp_c' => $dayData['day']['avgtemp_c'],
-                    'avgtemp_f' => $dayData['day']['avgtemp_f'],
-                    'condition' => $dayData['day']['condition']['text'],
-                    'condition_icon' => $dayData['day']['condition']['icon'],
-                    'maxwind_kph' => $dayData['day']['maxwind_kph'],
-                    'maxwind_mph' => $dayData['day']['maxwind_mph'],
-                    'totalprecip_mm' => $dayData['day']['totalprecip_mm'],
-                    'totalprecip_in' => $dayData['day']['totalprecip_in'],
-                    'avghumidity' => $dayData['day']['avghumidity'],
-                    'daily_chance_of_rain' => $dayData['day']['daily_chance_of_rain'],
-                    'daily_chance_of_snow' => $dayData['day']['daily_chance_of_snow'],
-                    'uv' => $dayData['day']['uv']
-                ],
-                'hourly_forecast' => $weatherHours
+                'temperature_forecast' => $temperatureHours
             ];
         }
         
@@ -427,20 +343,7 @@ $app->get('/weather/coordinates', function (Request $request, Response $response
             'location' => [
                 'name' => $weatherData['location']['name'],
                 'region' => $weatherData['location']['region'],
-                'country' => $weatherData['location']['country'],
-                'lat' => $weatherData['location']['lat'],
-                'lon' => $weatherData['location']['lon'],
-                'tz_id' => $weatherData['location']['tz_id'],
-                'localtime' => $weatherData['location']['localtime']
-            ],
-            'current' => [
-                'temp_c' => $weatherData['current']['temp_c'],
-                'temp_f' => $weatherData['current']['temp_f'],
-                'condition' => $weatherData['current']['condition']['text'],
-                'condition_icon' => $weatherData['current']['condition']['icon'],
-                'humidity' => $weatherData['current']['humidity'],
-                'wind_kph' => $weatherData['current']['wind_kph'],
-                'wind_dir' => $weatherData['current']['wind_dir']
+                'country' => $weatherData['location']['country']
             ],
             'forecast' => $dailyForecasts,
             'request_info' => [
@@ -448,8 +351,7 @@ $app->get('/weather/coordinates', function (Request $request, Response $response
                 'longitude' => $lon,
                 'days_requested' => $days,
                 'intervals' => '3 hours',
-                'start_time' => '06:00',
-                'timezone' => $weatherData['location']['tz_id']
+                'start_time' => '06:00'
             ]
         ];
         
