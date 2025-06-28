@@ -73,6 +73,7 @@ try {
     // Load routes
     require __DIR__ . '/src/routes.php';
     require __DIR__ . '/src/fertilizer.php';
+    require __DIR__ . '/src/weather.php';
 
     //serve static image files
     $app->get('/images/{filename}', function (RequestInterface $request, ResponseInterface $response, array $args) {
