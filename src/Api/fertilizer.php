@@ -6,7 +6,7 @@ use Firebase\JWT\Key;
 use App\Services\Mailer;
 
 // Include the token validation functions
-require_once __DIR__ . '/validate_token.php';
+require_once __DIR__ . '/../validate_token.php';
 
 $secret = $_ENV['JWT_SECRET'];
 

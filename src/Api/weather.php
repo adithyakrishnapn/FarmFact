@@ -3,7 +3,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 // Include the token validation functions
-require_once __DIR__ . '/validate_token.php';
+require_once __DIR__ . '/../validate_token.php';
 
 // Alternative route for getting weather by coordinates (lat, lon)
 $app->get('/weather/coordinates', function (Request $request, Response $response) {
